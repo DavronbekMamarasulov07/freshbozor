@@ -20,8 +20,7 @@ import {
   useLanguage,
   useStore,
 } from '../context/contexts'
-import { submitOrder } from '../utils/ordersApi'
-import OrderStatusTracker from '../components/OrderStatusTracker'
+import { sendOrderToTelegram } from '../utils/telegram'
 
 const PROMO_CODES = {
   YANGI10: 0.1,
@@ -33,7 +32,6 @@ export default function CartPage() {
   const {
     cartItems,
     cartSubtotal,
-    orders,
     updateCartQty,
     removeFromCart,
     clearCart,
@@ -101,9 +99,6 @@ export default function CartPage() {
     const orderPayload = {
       id: `FB-${Math.floor(100000 + Math.random() * 900000)}`,
       createdAt: new Date().toISOString(),
-      currency: t.product.currency,
-      deliveryTimeLabel: deliveryTimeMap[customer.deliveryTime] || customer.deliveryTime,
-      paymentMethodLabel: paymentMethodMap[customer.paymentMethod] || customer.paymentMethod,
       customer: { ...customer },
       promoCode: appliedPromo,
       items: cartItems.map((i) => ({
@@ -119,9 +114,15 @@ export default function CartPage() {
       total: grandTotal,
     }
 
-    const res = await submitOrder(orderPayload)
-    const savedOrder = placeOrder(res.order || orderPayload)
-    setTelegramResult(res.telegram)
+    const tgResult = await sendOrderToTelegram(orderPayload, {
+      currency: t.product.currency,
+      deliveryTimeLabel: deliveryTimeMap[customer.deliveryTime] || customer.deliveryTime,
+      paymentMethodLabel: paymentMethodMap[customer.paymentMethod] || customer.paymentMethod,
+      freeLabel: t.cartPage.free,
+    })
+
+    const savedOrder = placeOrder(orderPayload)
+    setTelegramResult(tgResult)
     setConfirmedOrder(savedOrder)
     setIsSubmitting(false)
   }
@@ -167,8 +168,6 @@ export default function CartPage() {
               )}
             </div>
           )}
-          <OrderStatusTracker initialOrder={confirmedOrder} />
-
           <div className="p-4 rounded-2xl bg-[#f7faf5] dark:bg-[#1a2920] text-sm text-left space-y-1.5 border border-[#e5eee1] dark:border-[#263c2e]">
             <div className="flex justify-between">
               <span className="text-[#5d7060] dark:text-[#96ad9b]">{t.cartPage.fullName}:</span>
@@ -190,19 +189,13 @@ export default function CartPage() {
             </div>
           </div>
 
-          <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
+          <div className="pt-2">
             <Link
               to="/products"
               className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-[#236927] hover:bg-[#1b5e20] text-white font-bold text-sm transition-colors"
             >
               <span>{t.cartPage.continueShopping}</span>
               <ArrowRight className="w-4 h-4" />
-            </Link>
-            <Link
-              to="/orders"
-              className="inline-flex items-center gap-2 px-5 py-3.5 rounded-xl border border-[#cddcc8] dark:border-[#2c4535] text-[#19331c] dark:text-white font-bold text-sm hover:border-[#2e7d32] transition-colors"
-            >
-              <span>{t.orderTracking.trackLink}</span>
             </Link>
           </div>
         </div>
@@ -221,7 +214,7 @@ export default function CartPage() {
             {t.cartPage.emptyTitle}
           </h1>
           <p className="text-sm text-[#546858] dark:text-[#9cb3a1]">{t.cartPage.emptyDesc}</p>
-          <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
+          <div className="pt-2">
             <Link
               to="/products"
               className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-[#236927] hover:bg-[#1b5e20] text-white font-bold text-sm transition-colors"
@@ -229,14 +222,6 @@ export default function CartPage() {
               <span>{t.cartPage.goShopping}</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
-            {orders.length > 0 && (
-              <Link
-                to="/orders"
-                className="inline-flex items-center gap-2 px-5 py-3.5 rounded-xl border border-[#cddcc8] dark:border-[#2c4535] text-[#19331c] dark:text-white font-bold text-sm hover:border-[#2e7d32] transition-colors"
-              >
-                <span>{t.orderTracking.trackLink}</span>
-              </Link>
-            )}
           </div>
         </div>
       </div>

@@ -11,7 +11,6 @@ import AboutPage from './pages/AboutPage'
 import CartPage from './pages/CartPage'
 import ContactPage from './pages/ContactPage'
 import HomePage from './pages/HomePage'
-import OrderStatusPage from './pages/OrderStatusPage'
 import ProductsPage from './pages/ProductsPage'
 import WishlistPage from './pages/WishlistPage'
 
@@ -35,7 +34,6 @@ function AppShell() {
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/cart" element={<CartPage />} />
-          <Route path="/orders" element={<OrderStatusPage />} />
           <Route path="/wishlist" element={<WishlistPage />} />
           <Route path="*" element={<HomePage />} />
         </Routes>

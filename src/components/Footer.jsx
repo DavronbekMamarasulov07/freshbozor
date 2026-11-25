@@ -92,7 +92,7 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link to="/orders" className="hover:text-[#86efac] transition-colors">
+                <Link to="/cart" className="hover:text-[#86efac] transition-colors">
                   {t.footer.orderTracking}
                 </Link>
               </li>
